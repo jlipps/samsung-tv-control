@@ -31,6 +31,7 @@ class Samsung {
   private SAVE_TOKEN: boolean
   private TOKEN_FILE = path.join(__dirname, 'token.txt')
   private WS_URL: string
+  private SECURE_SOCKET: boolean
 
   constructor(config: Configuration) {
     if (!config.ip) {
@@ -44,6 +45,7 @@ class Samsung {
     this.IP = config.ip
     this.MAC = config.mac
     this.PORT = Number(config.port) || 8002
+    this.SECURE_SOCKET = config.secureSocket ?? this.PORT !== 8001
     this.TOKEN = config.token || ''
     this.NAME_APP = Buffer.from(config.nameApp || 'NodeJS Remote').toString('base64')
     this.SAVE_TOKEN = config.saveToken || false
@@ -120,7 +122,7 @@ class Samsung {
       })
     })
   }
-  
+
   public setToken(token: string) {
     this.TOKEN = token
     this.WS_URL = this._getWSUrl()
@@ -543,7 +545,7 @@ class Samsung {
   }
 
   private _getWSUrl() {
-    return `${this.PORT === 8001 ? 'ws' : 'wss'}://${this.IP}:${
+    return `${this.SECURE_SOCKET ? 'wss' : 'ws'}://${this.IP}:${
       this.PORT
     }/api/v2/channels/samsung.remote.control?name=${this.NAME_APP}${
       this.TOKEN !== '' ? `&token=${this.TOKEN}` : ''
