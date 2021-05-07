@@ -15,6 +15,10 @@ export interface Configuration {
   debug?: boolean
   /** Port, for old models 8001 (Default: 8002) */
   port?: number
+  /** Whether websocket should override to ssl (Default: true if port is not 8001, false otherwise) */
+  secureSocket?: boolean
+  /** Whether we should delay sending commands by 1 second (Default: true if port is 8001) */
+  delayCommands?: boolean
   /** Autosave token (Default: false) */
   saveToken?: boolean
 }

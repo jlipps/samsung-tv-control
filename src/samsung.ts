@@ -32,6 +32,7 @@ class Samsung {
   private TOKEN_FILE = path.join(__dirname, 'token.txt')
   private WS_URL: string
   private SECURE_SOCKET: boolean
+  private DELAY_COMMANDS: boolean
 
   constructor(config: Configuration) {
     if (!config.ip) {
@@ -46,6 +47,7 @@ class Samsung {
     this.MAC = config.mac
     this.PORT = Number(config.port) || 8002
     this.SECURE_SOCKET = config.secureSocket ?? this.PORT !== 8001
+    this.DELAY_COMMANDS = config.delayCommands ?? this.PORT === 8001
     this.TOKEN = config.token || ''
     this.NAME_APP = Buffer.from(config.nameApp || 'NodeJS Remote').toString('base64')
     this.SAVE_TOKEN = config.saveToken || false
@@ -285,7 +287,7 @@ class Samsung {
   public isAvailable(): Promise<boolean> {
     return new Promise((resolve, reject) => {
       request.get(
-        { url: `http://${this.IP}:8001${this.PORT === 55000 ? '/ms/1.0/' : '/api/v2/'}`, timeout: 3000 },
+        { url: `http://${this.IP}:${this.PORT}${this.PORT === 55000 ? '/ms/1.0/' : '/api/v2/'}`, timeout: 3000 },
         (err: Error, res: request.RequestResponse) => {
           if (err) {
             return reject(err)
@@ -358,7 +360,7 @@ class Samsung {
     this.LOGGER.log('wsUrl', this.WS_URL, '_send')
 
     ws.on('open', () => {
-      if (this.PORT === 8001) {
+      if (this.DELAY_COMMANDS) {
         setTimeout(() => ws.send(JSON.stringify(command)), 1000)
       } else {
         ws.send(JSON.stringify(command))
